@@ -1,0 +1,56 @@
+version: "2"
+services:
+  movies_service:
+    command: python manage.py runserver 0.0.0.0:8000
+    restart: always
+    build: ./Movies
+    ports:
+    - "8000:8000"
+    depends_on:
+    - mongodb
+    
+  bookings_service:
+    command: python manage.py runserver 0.0.0.0:8001
+    restart: always
+    build: ./Bookings
+    ports:
+    - "8001:8001"
+    depends_on:
+    - mongodb
+  
+
+  notifications_service:
+    command: python manage.py runserver 0.0.0.0:8002
+    restart: always
+    build: ./Notifications
+    ports:
+    - "8002:8002"
+    depends_on:
+    - mongodb
+  
+  catalogs_service:
+    command: python manage.py runserver 0.0.0.0:8003
+    restart: always
+    build: ./Catalogs
+    ports:
+    - "8003:8003"
+    depends_on:
+    - mongodb
+  
+  mongodb:
+    container_name: mongo_db
+    image: mongo
+    ports:
+    - "27017:27017"
+  
+  nginx:
+    build: ./Gateway
+    ports:
+      - "80:80"
+    container_name: gateway_service
+    restart: always
+    depends_on:
+      - bookings_service
+      - movies_service
+      - catalogs_service
+      - notifications_service  
