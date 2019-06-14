@@ -1,12 +1,12 @@
 from mongoengine import *
-connect('Cinema', host='mongodb', port=27017)
+connect('Cinema', host='localhost', port=27017)
 
 class Bookings(Document):
     UserID = GenericReferenceField( required=True )
-    Cinema = StringField()
-    Movie = StringField()
-    Schedule = StringField()
-    Seat = ListField()
+    Cinema = StringField(max_length=40,required=True)
+    Movie = StringField(max_length=40,required=True)
+    Schedule = StringField(max_length=40,required=True)
+    Seat = ListField(required=True)
     TotalAmount = FloatField()
 
 class Tickets(Document):
@@ -18,7 +18,7 @@ class Tickets(Document):
     BookingID = GenericReferenceField( required=True )
 
 class Users(Document):
-    username = StringField()
-    password = StringField()
-    fullname = StringField()
+    username = StringField(max_length=10)
+    password = StringField(max_length=10)
+    fullname = StringField(require=True)
     Email = StringField(require=True)

@@ -9,70 +9,80 @@ import json
 import datetime
 from api.models import *
 
+
 def getlist_user(request):
     if(request.method == 'GET'):
         list_user = Users.objects.all()
-        list_user_srlz = UsersSerializer(list_user,many=True)
-        return JsonResponse(list_user_srlz.data,safe=False)
+        list_user_srlz = UsersSerializer(list_user, many=True)
+        return JsonResponse(list_user_srlz.data, safe=False)
 
 
 @csrf_exempt
 def add_user(request):
-    if(request.method == 'POST'):
-        payload = json.loads(request.body)
-        user = Users(
-            username = payload['username'],
-            password = payload['password'],
-            fullname = payload['fullname'],
-            Email = payload['Email']
-        )
-        user.save()
-        return JsonResponse({'statusCode':200,'message':'Insert user successfully'},safe=False)
+    try:
+        if(request.method == 'POST'):
+            payload = json.loads(request.body)
+            user = Users(
+                username=payload['username'],
+                password=payload['password'],
+                fullname=payload['fullname'],
+                Email=payload['Email']
+            )
+            user.save()
+            response = {'statusCode': 200,
+                        'message': 'Insert user successfully'}
+    except BaseException as e:
+        response = {'statusCode': 201, 'message': 'validation ERROR' + str(e)}
+    return JsonResponse(response, safe=False)
+
 
 def list_all(request):
     if(request.method == 'GET'):
         list_booking = Bookings.objects.all()
-        list_booking_srlz = BookingsSerializer(list_booking,many=True)
+        list_booking_srlz = BookingsSerializer(list_booking, many=True)
 
-        list_ticket =Tickets.objects.all()
-        list_ticket_srlz = TicketsSerializer(list_ticket,many=True)
+        list_ticket = Tickets.objects.all()
+        list_ticket_srlz = TicketsSerializer(list_ticket, many=True)
 
-        return JsonResponse({'list_Booking':list_booking_srlz.data,'list_Ticket':list_ticket_srlz.data},safe=False)
-
+        return JsonResponse({'list_Booking': list_booking_srlz.data, 'list_Ticket': list_ticket_srlz.data}, safe=False)
 
 
 @csrf_exempt
 def order(request):
     if (request.method == 'POST'):
-        
+
         payload = json.loads(request.body)
-        try: 
-            user = Users.objects.get(pk = payload['UserID'])
+        try:
+            user = Users.objects.get(pk=payload['UserID'])
         except:
-            return JsonResponse({'statusCode':201,'message':'user NOT FOUND'},safe=False)
-        booking = Bookings(
-            UserID = user,
-            Cinema = payload['Cinema'],
-            Schedule = payload['Schedule'],
-            Movie = payload['Movie'],
-            Seat = payload['Seat'],
-            TotalAmount = payload['TotalAmount']
-        )
-        booking.save()
-        ticket = Tickets(
-            Cinema = payload['Cinema'],
-            Schedule = payload['Schedule'],
-            Movie = payload['Movie'],
-            Seat = payload['Seat'],
-            Status = 'Paid',
-            BookingID = booking
-        )
-        ticket.save()
-        noti = {
-            "Seat": payload['Seat'],
-            "To": [user.Email],
-            "Title": "Green Studio Cinema - Lich chieu phim" + payload['Movie'],
-            "Content" :"Lịch chiếu: " + payload['Schedule']
-        }
-        noti_res = notification.send_noti(noti)
-    return JsonResponse({'statusCode':200,'message':'Order successfully!','noti_Result':noti_res},safe=False)
+            return JsonResponse({'statusCode': 201, 'message': 'user NOT FOUND'}, safe=False)
+
+        try:
+            booking = Bookings(
+                UserID=user,
+                Cinema=payload['Cinema'],
+                Schedule=payload['Schedule'],
+                Movie=payload['Movie'],
+                Seat=payload['Seat'],
+                TotalAmount=payload['TotalAmount']
+            )
+            booking.save()
+            ticket = Tickets(
+                Cinema=payload['Cinema'],
+                Schedule=payload['Schedule'],
+                Movie=payload['Movie'],
+                Seat=payload['Seat'],
+                Status='Paid',
+                BookingID=booking
+            )
+            ticket.save()
+            noti = {
+                "Seat": payload['Seat'],
+                "To": [user.Email],
+                "Title": "Green Studio Cinema - Lich chieu phim" + payload['Movie'],
+                "Content": "Lịch chiếu: " + payload['Schedule']
+            }
+            noti_res = notification.send_noti(noti)
+        except BaseException as e:
+            response = {'statusCode': 201, 'message': 'validation ERROR' + str(e)}
+    return JsonResponse({'statusCode': 200, 'message': 'Order successfully!', 'noti_Result': noti_res}, safe=False)
