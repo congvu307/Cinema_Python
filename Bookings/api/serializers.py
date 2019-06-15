@@ -18,3 +18,6 @@ class UsersSerializer(serializers.DocumentSerializer):
     class Meta:
         model = Users
         fields = '__all__'
+    # def update(self,instance, validated_data):
+    #     updated_instance = super(UsersSerializer, self).update(instance, validated_data)
+    #     return updated_instance

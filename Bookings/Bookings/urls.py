@@ -18,6 +18,7 @@ from django.urls import path
 from api import views
 
 urlpatterns = [
+    path('api/booking/update_user_by_ID',views.update_user_by_ID),
     path('api/booking/all',views.list_all),
     path('api/booking/order',views.order),
     path('api/booking/add_user',views.add_user),

@@ -19,20 +19,22 @@ def getlist_user(request):
 
 @csrf_exempt
 def add_user(request):
-    try:
-        if(request.method == 'POST'):
-            payload = json.loads(request.body)
-            user = Users(
-                username=payload['username'],
-                password=payload['password'],
-                fullname=payload['fullname'],
-                Email=payload['Email']
-            )
-            user.save()
-            response = {'statusCode': 200,
-                        'message': 'Insert user successfully'}
-    except BaseException as e:
-        response = {'statusCode': 201, 'message': 'validation ERROR' + str(e)}
+    #try:
+    if(request.method == 'POST'):
+        payload = json.loads(request.body)
+        user = Users(
+            username=payload['username'],
+            password=payload['password'], 
+            fullname=payload['fullname'],
+            Email=payload['Email']
+        )
+        serU = UsersSerializer(data = user)
+        if(serU.is_valid()):
+            return JsonResponse({'statusCode':201,'message':'Valid Failed'}, safe=False)
+        user.save()
+        response = {'statusCode': 200,'message': 'Insert user successfully'}
+    ##except BaseException as e:
+     #   response = {'statusCode': 201, 'message': 'validation ERROR' + str(e)}
     return JsonResponse(response, safe=False)
 
 
@@ -86,3 +88,16 @@ def order(request):
         except BaseException as e:
             response = {'statusCode': 201, 'message': 'validation ERROR' + str(e)}
     return JsonResponse({'statusCode': 200, 'message': 'Order successfully!', 'noti_Result': noti_res}, safe=False)
+
+@csrf_exempt
+def update_user_by_ID (request):
+    if (request.method == 'POST'):
+        payload = json.loads(request.body)
+        data = payload['data']
+        
+        user = Users.objects.get(pk = payload['id'])
+        
+        user_s = UsersSerializer(user,data = data)
+        user_s.is_valid()
+        user_s.save()   
+        return JsonResponse(user_srlz.data,safe=False)
