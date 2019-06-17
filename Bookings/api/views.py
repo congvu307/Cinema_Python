@@ -94,9 +94,7 @@ def update_user_by_ID (request):
     if (request.method == 'POST'):
         payload = json.loads(request.body)
         data = payload['data']
-        
         user = Users.objects.get(pk = payload['id'])
-        
         user_s = UsersSerializer(user,data = data)
         user_s.is_valid()
         user_s.save()   
